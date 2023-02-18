@@ -305,21 +305,17 @@ def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:', suffix1=None, suf
         # make the other all caps
         elif tag == 'delete':
             for i in range(i1, i2):
-                #ref_token = colored(seq1[i].upper(), 'red')
-                ref_token = seq1[i]
+                ref_token = seq1[i].upper()
                 ref_tokens.append(ref_token)
             for i in range(i1, i2):
-                #hyp_token = colored('*' * len(seq1[i]), 'red')
                 hyp_token = '*' * len(seq1[i])
                 hyp_tokens.append(hyp_token)
         elif tag == 'insert':
             for i in range(j1, j2):
-                #ref_token = colored('*' * len(seq2[i]), 'red')
                 ref_token = '*' * len(seq2[i])
                 ref_tokens.append(ref_token)
             for i in range(j1, j2):
-                #hyp_token = colored(seq2[i].upper(), 'red')
-                hyp_token = seq2[i]
+                hyp_token = seq2[i].upper()
                 hyp_tokens.append(hyp_token)
         # More complicated logic for a substitution
         elif tag == 'replace':
@@ -351,8 +347,6 @@ def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:', suffix1=None, suf
                     s1[i] = '*' * len(w2)
                 if not w2:
                     s2[i] = '*' * len(w1)
-            #s1 = map(lambda x: colored(x, 'red'), s1)
-            #s2 = map(lambda x: colored(x, 'red'), s2)
             ref_tokens += s1
             hyp_tokens += s2
     if prefix1: ref_tokens.insert(0, prefix1)

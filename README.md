@@ -28,10 +28,10 @@ About the srandal fork
 -------------------------
 This version writes the results to a file, which is named using the third positional command line argument, instead of writing to the terminal.
 This makes it more convenient to create reports for text that contains encodings that are not easily displayed in the terminal.
-The use of color coding to mark differences has been replaced by upper-case, so this version doesn't require the termcolor module.
+Differences are now marked only with upper case instead of both upper case and color, so this version doesn't require the termcolor module.
 
 
-Installing & uninstalling (srandal fork)
+Installing, uninstalling, and usage (srandal fork)
 -------------------------
 Clone this git repo and install it:
 
@@ -47,10 +47,6 @@ Command line usage will be the same as described below, except running > wer --h
   ref                   Reference transcript filename
   hyp                   ASR hypothesis filename
   out                   Output filename
-
-To uninstall with pip:
-
-    pip uninstall asr-evaluation
 
 
 Installing & uninstalling (Original)
