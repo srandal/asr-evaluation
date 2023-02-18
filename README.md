@@ -45,6 +45,7 @@ To uninstall with pip:
 
 Command line usage will be the same as described below, except running > wer --help will show three positional arguments instead of two:
 ```
+positional arguments:
   ref                   Reference transcript filename
   hyp                   ASR hypothesis filename
   out                   Output filename
