@@ -54,6 +54,7 @@ substitution_table = defaultdict(int)
 # These are the editdistance opcodes that are condsidered 'errors'
 error_codes = ['replace', 'delete', 'insert']
 
+to_print = []
 
 # TODO - rename this function.  Move some of it into evaluate.py?
 def main(args):
@@ -89,10 +90,12 @@ def main(args):
         wer = 0.0
     # Compute SER
     ser = sent_error_count / counter if counter > 0 else 0.0
-    print('Sentence count: {}'.format(counter))
-    print('WER: {:10.3%} ({:10d} / {:10d})'.format(wer, error_count, ref_token_count))
-    print('WRR: {:10.3%} ({:10d} / {:10d})'.format(wrr, match_count, ref_token_count))
-    print('SER: {:10.3%} ({:10d} / {:10d})'.format(ser, sent_error_count, counter))
+    to_print.append('Sentence count: {}'.format(counter))
+    to_print.append('WER: {:10.3%} ({:10d} / {:10d})'.format(wer, error_count, ref_token_count))
+    to_print.append('WRR: {:10.3%} ({:10d} / {:10d})'.format(wrr, match_count, ref_token_count))
+    to_print.append('SER: {:10.3%} ({:10d} / {:10d})'.format(ser, sent_error_count, counter))
+
+    args.out.write('\n'.join(to_print))
 
 
 def process_line_pair(ref_line, hyp_line, case_insensitive=False, remove_empty_refs=False):
@@ -208,9 +211,9 @@ def print_instances(ref, hyp, sm, id_=None):
     """Print a single instance of a ref/hyp pair."""
     print_diff(sm, ref, hyp)
     if id_:
-        print(('SENTENCE {0:d}  {1!s}'.format(counter + 1, id_)))
+        to_print.append('SENTENCE {0:d}  {1!s}'.format(counter + 1, id_))
     else:
-        print('SENTENCE {0:d}'.format(counter + 1))
+        to_print.append('SENTENCE {0:d}'.format(counter + 1))
     # Handle cases where the reference is empty without dying
     if len(ref) != 0:
         correct_rate = sm.matches() / len(ref)
@@ -221,8 +224,8 @@ def print_instances(ref, hyp, sm, id_=None):
     else:
         correct_rate = 0.0
         error_rate = sm.matches()
-    print('Correct          = {0:6.1%}  {1:3d}   ({2:6d})'.format(correct_rate, sm.matches(), len(ref)))
-    print('Errors           = {0:6.1%}  {1:3d}   ({2:6d})'.format(error_rate, sm.distance(), len(ref)))
+    to_print.append('Correct          = {0:6.1%}  {1:3d}   ({2:6d})'.format(correct_rate, sm.matches(), len(ref)))
+    to_print.append('Errors           = {0:6.1%}  {1:3d}   ({2:6d})'.format(error_rate, sm.distance(), len(ref)))
 
 def track_confusions(sm, seq1, seq2):
     """Keep track of the errors in a global variable, given a sequence matcher."""
@@ -246,20 +249,20 @@ def print_confusions():
     """Print the confused words that we found... grouped by insertions, deletions
     and substitutions."""
     if len(insertion_table) > 0:
-        print('INSERTIONS:')
+        to_print.append('INSERTIONS:')
         for item in sorted(list(insertion_table.items()), key=lambda x: x[1], reverse=True):
             if item[1] >= min_count:
-                print('{0:20s} {1:10d}'.format(*item))
+                to_print.append('{0:20s} {1:10d}'.format(*item))
     if len(deletion_table) > 0:
-        print('DELETIONS:')
+        to_print.append('DELETIONS:')
         for item in sorted(list(deletion_table.items()), key=lambda x: x[1], reverse=True):
             if item[1] >= min_count:
-                print('{0:20s} {1:10d}'.format(*item))
+                to_print.append('{0:20s} {1:10d}'.format(*item))
     if len(substitution_table) > 0:
-        print('SUBSTITUTIONS:')
+        to_print.append('SUBSTITUTIONS:')
         for [w1, w2], count in sorted(list(substitution_table.items()), key=lambda x: x[1], reverse=True):
             if count >= min_count:
-                print('{0:20s} -> {1:20s}   {2:10d}'.format(w1, w2, count))
+                to_print.append('{0:20s} -> {1:20s}   {2:10d}'.format(w1, w2, count))
 
 # TODO - For some reason I was getting two different counts depending on how I count the matches,
 # so do an assertion in this code to make sure we're getting matching counts.
@@ -302,17 +305,21 @@ def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:', suffix1=None, suf
         # make the other all caps
         elif tag == 'delete':
             for i in range(i1, i2):
-                ref_token = colored(seq1[i].upper(), 'red')
+                #ref_token = colored(seq1[i].upper(), 'red')
+                ref_token = seq1[i]
                 ref_tokens.append(ref_token)
             for i in range(i1, i2):
-                hyp_token = colored('*' * len(seq1[i]), 'red')
+                #hyp_token = colored('*' * len(seq1[i]), 'red')
+                hyp_token = '*' * len(seq1[i])
                 hyp_tokens.append(hyp_token)
         elif tag == 'insert':
             for i in range(j1, j2):
-                ref_token = colored('*' * len(seq2[i]), 'red')
+                #ref_token = colored('*' * len(seq2[i]), 'red')
+                ref_token = '*' * len(seq2[i])
                 ref_tokens.append(ref_token)
             for i in range(j1, j2):
-                hyp_token = colored(seq2[i].upper(), 'red')
+                #hyp_token = colored(seq2[i].upper(), 'red')
+                hyp_token = seq2[i]
                 hyp_tokens.append(hyp_token)
         # More complicated logic for a substitution
         elif tag == 'replace':
@@ -344,16 +351,16 @@ def print_diff(sm, seq1, seq2, prefix1='REF:', prefix2='HYP:', suffix1=None, suf
                     s1[i] = '*' * len(w2)
                 if not w2:
                     s2[i] = '*' * len(w1)
-            s1 = map(lambda x: colored(x, 'red'), s1)
-            s2 = map(lambda x: colored(x, 'red'), s2)
+            #s1 = map(lambda x: colored(x, 'red'), s1)
+            #s2 = map(lambda x: colored(x, 'red'), s2)
             ref_tokens += s1
             hyp_tokens += s2
     if prefix1: ref_tokens.insert(0, prefix1)
     if prefix2: hyp_tokens.insert(0, prefix2)
     if suffix1: ref_tokens.append(suffix1)
     if suffix2: hyp_tokens.append(suffix2)
-    print(' '.join(ref_tokens))
-    print(' '.join(hyp_tokens))
+    to_print.append(' '.join(ref_tokens))
+    to_print.append(' '.join(hyp_tokens))
 
 def mean(seq):
     """Return the average of the elements of a sequence."""
@@ -363,5 +370,4 @@ def print_wer_vs_length():
     """Print the average word error rate for each length sentence."""
     avg_wers = {length: mean(wers) for length, wers in wer_bins.items()}
     for length, avg_wer in sorted(avg_wers.items(), key=lambda x: (x[1], x[0])):
-        print('{0:5d} {1:f}'.format(length, avg_wer))
-    print('')
+        to_print.append('{0:5d} {1:f}'.format(length, avg_wer))

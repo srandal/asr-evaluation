@@ -29,8 +29,9 @@ except Exception:
 def get_parser():
     """Parse the CLI args."""
     parser = argparse.ArgumentParser(description='Evaluate an ASR transcript against a reference transcript.')
-    parser.add_argument('ref', type=argparse.FileType('r'), help='Reference transcript filename')
-    parser.add_argument('hyp', type=argparse.FileType('r'), help='ASR hypothesis filename')
+    parser.add_argument('ref', type=argparse.FileType('r', encoding='utf8'), help='Reference transcript filename')
+    parser.add_argument('hyp', type=argparse.FileType('r', encoding='utf8'), help='ASR hypothesis filename')
+    parser.add_argument('out', type=argparse.FileType('w', encoding='utf8'), help='Output filename')
     print_args = parser.add_mutually_exclusive_group()
     print_args.add_argument('-i', '--print-instances', action='store_true',
                             help='Print all individual sentences and their errors.')
